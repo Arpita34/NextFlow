@@ -20,12 +20,7 @@ export default defineConfig({
   },
   dirs: ["./trigger"],
   build: {
-    external: ["@prisma/client", "prisma", "sharp", "fluent-ffmpeg", "@ffmpeg-installer/ffmpeg"],
-    env: {
-      OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY || "",
-      NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
-      DATABASE_URL: process.env.DATABASE_URL || "",
-    }
+    external: ["@prisma/client", "prisma", "sharp", "fluent-ffmpeg", "@ffmpeg-installer/ffmpeg"]
   }
 });
 
