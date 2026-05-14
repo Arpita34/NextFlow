@@ -1,0 +1,50 @@
+{
+  "configPath": "F:\\Nextflow\\nextflow\\.trigger\\tmp\\build-v9cHDb\\trigger.config.mjs",
+  "tasks": [
+    {
+      "id": "crop-image-task",
+      "retry": {
+        "maxAttempts": 3,
+        "factor": 2,
+        "minTimeoutInMs": 1000,
+        "maxTimeoutInMs": 10000,
+        "randomize": true
+      },
+      "maxDuration": 300,
+      "filePath": "trigger/crop-image-task.ts",
+      "exportName": "cropImageTask",
+      "entryPoint": "F:\\Nextflow\\nextflow\\.trigger\\tmp\\build-v9cHDb\\crop-image-task.mjs"
+    },
+    {
+      "id": "extract-frame-task",
+      "retry": {
+        "maxAttempts": 3,
+        "factor": 2,
+        "minTimeoutInMs": 1000,
+        "maxTimeoutInMs": 10000,
+        "randomize": true
+      },
+      "maxDuration": 300,
+      "filePath": "trigger/extract-frame-task.ts",
+      "exportName": "extractFrameTask",
+      "entryPoint": "F:\\Nextflow\\nextflow\\.trigger\\tmp\\build-v9cHDb\\extract-frame-task.mjs"
+    },
+    {
+      "id": "llm-node-task",
+      "retry": {
+        "maxAttempts": 3,
+        "factor": 2,
+        "minTimeoutInMs": 1000,
+        "maxTimeoutInMs": 10000,
+        "randomize": true
+      },
+      "maxDuration": 300,
+      "filePath": "trigger/llm-node-task.ts",
+      "exportName": "llmNodeTask",
+      "entryPoint": "F:\\Nextflow\\nextflow\\.trigger\\tmp\\build-v9cHDb\\llm-node-task.mjs"
+    }
+  ],
+  "workerEntryPoint": "F:\\Nextflow\\nextflow\\.trigger\\tmp\\build-v9cHDb\\dev-run-worker.mjs",
+  "runtime": "node",
+  "customConditions": []
+}
