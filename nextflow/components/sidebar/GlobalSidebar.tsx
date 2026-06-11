@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { 
   Home, 
@@ -19,6 +19,8 @@ import {
   Box,
   PanelLeftClose,
   PanelLeftOpen,
+  Menu,
+  X,
 } from "lucide-react";
 import { UserButton } from "@clerk/nextjs";
 
@@ -49,8 +51,14 @@ export default function GlobalSidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const [width, setWidth] = useState(DEFAULT_WIDTH);
   const [isResizing, setIsResizing] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
+
+  // Close mobile drawer on route change
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
 
   const startResize = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -73,21 +81,27 @@ export default function GlobalSidebar() {
 
   const sidebarWidth = collapsed ? MIN_WIDTH : width;
 
-  return (
-    <aside
-      ref={sidebarRef}
-      className="shrink-0 bg-[#0a0a09] text-gray-300 flex flex-col h-full overflow-hidden relative transition-[width] duration-200 ease-in-out"
-      style={{ width: sidebarWidth }}
-    >
+  const SidebarContent = ({ isMobile = false }: { isMobile?: boolean }) => (
+    <>
       {/* Collapse toggle */}
-      <div className={`p-2 ${collapsed ? "flex justify-center" : "flex justify-end"}`}>
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-600 hover:text-white hover:bg-zinc-800 transition-colors"
-          title={collapsed ? "Expand" : "Collapse"}
-        >
-          {collapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
-        </button>
+      <div className={`p-2 ${(collapsed && !isMobile) ? "flex justify-center" : "flex justify-between items-center"}`}>
+        {isMobile && (
+          <button
+            onClick={() => setMobileOpen(false)}
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-600 hover:text-white hover:bg-zinc-800 transition-colors"
+          >
+            <X size={16} />
+          </button>
+        )}
+        {!isMobile && (
+          <button
+            onClick={() => setCollapsed(!collapsed)}
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-600 hover:text-white hover:bg-zinc-800 transition-colors ml-auto"
+            title={collapsed ? "Expand" : "Collapse"}
+          >
+            {collapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
+          </button>
+        )}
       </div>
 
       {/* Navigation */}
@@ -100,11 +114,11 @@ export default function GlobalSidebar() {
             return (
               <div
                 key={item.label}
-                className={`flex items-center gap-3 rounded-lg transition-colors opacity-50 cursor-not-allowed ${collapsed ? "justify-center px-0 py-2" : "px-3 py-2"}`}
+                className={`flex items-center gap-3 rounded-lg transition-colors opacity-50 cursor-not-allowed ${(!collapsed || isMobile) ? "px-3 py-2" : "justify-center px-0 py-2"}`}
                 title={item.label}
               >
                 <Icon size={18} className={item.color || ""} />
-                {!collapsed && <span className="text-sm">{item.label}</span>}
+                {(!collapsed || isMobile) && <span className="text-sm">{item.label}</span>}
               </div>
             );
           }
@@ -113,11 +127,11 @@ export default function GlobalSidebar() {
             <Link
               key={item.label}
               href={item.href}
-              className={`flex items-center gap-3 rounded-lg transition-colors ${collapsed ? "justify-center px-0 py-2" : "px-3 py-2"} ${isActive ? "bg-zinc-800/80 text-white font-medium" : "hover:bg-zinc-900"}`}
-              title={collapsed ? item.label : undefined}
+              className={`flex items-center gap-3 rounded-lg transition-colors ${(!collapsed || isMobile) ? "px-3 py-2" : "justify-center px-0 py-2"} ${isActive ? "bg-zinc-800/80 text-white font-medium" : "hover:bg-zinc-900"}`}
+              title={collapsed && !isMobile ? item.label : undefined}
             >
               <Icon size={18} className={item.color || ""} />
-              {!collapsed && <span className="text-sm">{item.label}</span>}
+              {(!collapsed || isMobile) && <span className="text-sm">{item.label}</span>}
             </Link>
           );
         })}
@@ -125,7 +139,7 @@ export default function GlobalSidebar() {
 
       {/* Tools */}
       <div className="flex flex-col gap-0.5 px-2 mt-4">
-        {!collapsed && (
+        {(!collapsed || isMobile) && (
           <span className="px-3 text-[10px] font-semibold text-gray-600 uppercase tracking-widest mb-1">Tools</span>
         )}
         {TOOLS.map((tool) => {
@@ -133,11 +147,11 @@ export default function GlobalSidebar() {
           return (
             <div
               key={tool.label}
-              className={`flex items-center gap-3 rounded-lg transition-colors opacity-60 cursor-not-allowed ${collapsed ? "justify-center px-0 py-2" : "px-3 py-2"}`}
+              className={`flex items-center gap-3 rounded-lg transition-colors opacity-60 cursor-not-allowed ${(!collapsed || isMobile) ? "px-3 py-2" : "justify-center px-0 py-2"}`}
               title={tool.label}
             >
               <Icon size={18} className={tool.color} />
-              {!collapsed && <span className="text-sm">{tool.label}</span>}
+              {(!collapsed || isMobile) && <span className="text-sm">{tool.label}</span>}
             </div>
           );
         })}
@@ -148,7 +162,7 @@ export default function GlobalSidebar() {
 
       {/* Bottom */}
       <div className="p-2 flex flex-col gap-2 border-t border-[#1E1E2E]">
-        {!collapsed && (
+        {(!collapsed || isMobile) && (
           <>
             <span className="text-[10px] text-gray-500 px-1">Earn 3,000 Credits</span>
             <button className="w-full h-10 rounded-lg bg-gradient-to-r from-blue-700 to-blue-500 text-white text-sm font-medium hover:from-blue-600 hover:to-blue-400 transition-all shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:shadow-[0_0_25px_rgba(59,130,246,0.5)]">
@@ -156,21 +170,59 @@ export default function GlobalSidebar() {
             </button>
           </>
         )}
-        <div className={`flex items-center gap-2 pt-1 ${collapsed ? "justify-center" : "px-1"}`}>
+        <div className={`flex items-center gap-2 pt-1 ${(collapsed && !isMobile) ? "justify-center" : "px-1"}`}>
           <UserButton />
-          {!collapsed && (
+          {(!collapsed || isMobile) && (
             <span className="text-xs text-gray-500 truncate">Free</span>
           )}
         </div>
       </div>
+    </>
+  );
 
-      {/* Resize Handle — only when expanded */}
-      {!collapsed && (
+  return (
+    <>
+      {/* Mobile hamburger button — visible only on small screens */}
+      <button
+        onClick={() => setMobileOpen(true)}
+        className="md:hidden fixed top-3 left-3 z-50 w-9 h-9 bg-zinc-900 border border-[#1E1E2E] rounded-lg flex items-center justify-center text-gray-400 hover:text-white hover:bg-zinc-800 transition-colors"
+        title="Open Menu"
+      >
+        <Menu size={18} />
+      </button>
+
+      {/* Mobile Backdrop */}
+      {mobileOpen && (
         <div
-          onMouseDown={startResize}
-          className={`absolute top-0 right-0 w-1 h-full cursor-col-resize hover:bg-[#6C63FF]/50 transition-colors ${isResizing ? "bg-[#6C63FF]/50" : ""}`}
+          className="md:hidden fixed inset-0 bg-black/60 z-40 backdrop-blur-sm"
+          onClick={() => setMobileOpen(false)}
         />
       )}
-    </aside>
+
+      {/* Mobile Drawer */}
+      <aside
+        className={`md:hidden fixed top-0 left-0 h-full bg-[#0a0a09] text-gray-300 flex flex-col z-50 overflow-hidden transition-transform duration-300 ease-in-out ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}
+        style={{ width: DEFAULT_WIDTH }}
+      >
+        <SidebarContent isMobile={true} />
+      </aside>
+
+      {/* Desktop Sidebar */}
+      <aside
+        ref={sidebarRef}
+        className="hidden md:flex shrink-0 bg-[#0a0a09] text-gray-300 flex-col h-full overflow-hidden relative transition-[width] duration-200 ease-in-out"
+        style={{ width: sidebarWidth }}
+      >
+        <SidebarContent isMobile={false} />
+
+        {/* Resize Handle — only when expanded */}
+        {!collapsed && (
+          <div
+            onMouseDown={startResize}
+            className={`absolute top-0 right-0 w-1 h-full cursor-col-resize hover:bg-[#6C63FF]/50 transition-colors ${isResizing ? "bg-[#6C63FF]/50" : ""}`}
+          />
+        )}
+      </aside>
+    </>
   );
 }

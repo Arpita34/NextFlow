@@ -8,7 +8,7 @@ const WorkflowCanvas = dynamic(() => import("@/components/canvas/WorkflowCanvas"
   ssr: false,
   loading: () => <div className="flex-1 w-full h-full bg-[#0a0a09] flex items-center justify-center text-gray-500">Loading Canvas...</div>
 });
-import { ChevronDown, Undo, Redo, Play, Save, Check, Download, Upload, Loader2 } from "lucide-react";
+import { ChevronDown, Undo, Redo, Play, Save, Check, Download, Upload, Loader2, PanelLeft, PanelRight, X } from "lucide-react";
 import Link from "next/link";
 import { ReactFlowProvider } from "@xyflow/react";
 import LeftSidebar from "@/components/sidebar/LeftSidebar";
@@ -20,6 +20,8 @@ export default function WorkflowPage({ params }: { params: Promise<{ id: string 
   const { id } = React.use(params);
   const [isEditingName, setIsEditingName] = useState(false);
   const [showSaveToast, setShowSaveToast] = useState(false);
+  const [showLeftSidebar, setShowLeftSidebar] = useState(false);
+  const [showRightSidebar, setShowRightSidebar] = useState(false);
   
   const workflowName = useStore((s) => s.workflowName);
   const setWorkflowName = useStore((s) => s.setWorkflowName);
@@ -106,17 +108,17 @@ export default function WorkflowPage({ params }: { params: Promise<{ id: string 
       )}
 
       {/* ── Static Top Header ── */}
-      <header className="h-12 shrink-0 flex items-center justify-between px-3 border-b border-[#1E1E2E] bg-[#0a0a09] z-50">
+      <header className="h-12 shrink-0 flex items-center justify-between px-2 sm:px-3 border-b border-[#1E1E2E] bg-[#0a0a09] z-50 gap-2">
         {/* Left: Logo + Name */}
-        <div className="flex items-center gap-2">
-          <Link href="/editor" className="w-8 h-8 bg-zinc-900 border border-[#1E1E2E] rounded-lg flex items-center justify-center text-white hover:bg-zinc-800 transition-colors" title="Back to Editor">
+        <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+          <Link href="/editor" className="w-8 h-8 bg-zinc-900 border border-[#1E1E2E] rounded-lg flex items-center justify-center text-white hover:bg-zinc-800 transition-colors shrink-0" title="Back to Editor">
             <div className="w-3 h-3 bg-[#6C63FF] rounded-sm" />
           </Link>
           
           {isEditingName ? (
             <input
               autoFocus
-              className="bg-zinc-900 border border-[#6C63FF] rounded-lg px-3 py-1 text-sm font-medium text-white focus:outline-none"
+              className="bg-zinc-900 border border-[#6C63FF] rounded-lg px-2 sm:px-3 py-1 text-sm font-medium text-white focus:outline-none min-w-0 w-32 sm:w-auto"
               value={workflowName}
               onChange={(e) => setWorkflowName(e.target.value)}
               onBlur={() => setIsEditingName(false)}
@@ -125,31 +127,40 @@ export default function WorkflowPage({ params }: { params: Promise<{ id: string 
           ) : (
             <button 
               onClick={() => setIsEditingName(true)}
-              className="flex items-center gap-1.5 px-2 py-1 rounded-lg hover:bg-zinc-800 transition-colors group"
+              className="flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2 py-1 rounded-lg hover:bg-zinc-800 transition-colors group min-w-0"
               title="Click to rename"
             >
-              <span className="text-sm font-medium text-white">{workflowName}</span>
-              <ChevronDown size={12} className="text-gray-600 group-hover:text-[#6C63FF] transition-colors" />
+              <span className="text-sm font-medium text-white truncate max-w-[100px] sm:max-w-[180px]">{workflowName}</span>
+              <ChevronDown size={12} className="text-gray-600 group-hover:text-[#6C63FF] transition-colors shrink-0" />
             </button>
           )}
 
           {lastSavedAt && (
-            <span className="text-[10px] text-gray-600">
+            <span className="text-[10px] text-gray-600 hidden sm:inline">
               Saved {lastSavedAt.toLocaleTimeString()}
             </span>
           )}
         </div>
 
         {/* Right: Actions */}
-        <div className="flex items-center gap-3">
-          <Button onClick={handleSave} disabled={isSaving} variant="outline" size="sm" className="h-8 gap-1.5 text-xs bg-zinc-900 border-[#1E1E2E] text-gray-300 hover:text-white hover:bg-zinc-800 rounded-lg">
+        <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+          {/* Mobile panel toggles */}
+          <button
+            onClick={() => { setShowLeftSidebar(!showLeftSidebar); setShowRightSidebar(false); }}
+            className="sm:hidden w-8 h-8 bg-zinc-900 border border-[#1E1E2E] rounded-lg flex items-center justify-center text-gray-400 hover:text-white hover:bg-zinc-800 transition-colors"
+            title="Toggle Nodes Panel"
+          >
+            <PanelLeft size={14} />
+          </button>
+
+          <Button onClick={handleSave} disabled={isSaving} variant="outline" size="sm" className="h-8 gap-1 sm:gap-1.5 text-xs bg-zinc-900 border-[#1E1E2E] text-gray-300 hover:text-white hover:bg-zinc-800 rounded-lg px-2 sm:px-3">
             {isSaving ? <Loader2 size={13} className="animate-spin" /> : <Save size={13} />}
-            <span className="font-medium">{isSaving ? "Saving..." : "Save"}</span>
+            <span className="font-medium hidden xs:inline">{isSaving ? "Saving..." : "Save"}</span>
           </Button>
-          <button onClick={handleExportJSON} className="w-8 h-8 bg-zinc-900 border border-[#1E1E2E] rounded-lg flex items-center justify-center text-gray-400 hover:text-white hover:bg-zinc-800 transition-colors" title="Export JSON">
+          <button onClick={handleExportJSON} className="hidden sm:flex w-8 h-8 bg-zinc-900 border border-[#1E1E2E] rounded-lg items-center justify-center text-gray-400 hover:text-white hover:bg-zinc-800 transition-colors" title="Export JSON">
             <Download size={14} />
           </button>
-          <button onClick={handleImportJSON} className="w-8 h-8 bg-zinc-900 border border-[#1E1E2E] rounded-lg flex items-center justify-center text-gray-400 hover:text-white hover:bg-zinc-800 transition-colors" title="Import JSON">
+          <button onClick={handleImportJSON} className="hidden sm:flex w-8 h-8 bg-zinc-900 border border-[#1E1E2E] rounded-lg items-center justify-center text-gray-400 hover:text-white hover:bg-zinc-800 transition-colors" title="Import JSON">
             <Upload size={14} />
           </button>
 
@@ -161,14 +172,23 @@ export default function WorkflowPage({ params }: { params: Promise<{ id: string 
                 executeWorkflow(state.nodes, state.edges, workflowId || id, hasSelected ? 'selected' : 'full');
               });
             }}
-            className="flex items-center gap-1.5 bg-[#6C63FF] hover:bg-[#5a52d5] text-white rounded-lg px-4 py-1.5 transition-colors text-xs"
+            className="flex items-center gap-1 sm:gap-1.5 bg-[#6C63FF] hover:bg-[#5a52d5] text-white rounded-lg px-2.5 sm:px-4 py-1.5 transition-colors text-xs"
           >
             <Play size={13} />
-            <span className="font-medium">
-              {useStore(s => s.nodes.some(n => n.selected)) ? "Run Selected" : "Run Workflow"}
+            <span className="font-medium hidden xs:inline">
+              {useStore(s => s.nodes.some(n => n.selected)) ? "Run Selected" : "Run"}
             </span>
           </button>
-          <div className="ml-1">
+
+          <button
+            onClick={() => { setShowRightSidebar(!showRightSidebar); setShowLeftSidebar(false); }}
+            className="sm:hidden w-8 h-8 bg-zinc-900 border border-[#1E1E2E] rounded-lg flex items-center justify-center text-gray-400 hover:text-white hover:bg-zinc-800 transition-colors"
+            title="Toggle History Panel"
+          >
+            <PanelRight size={14} />
+          </button>
+
+          <div className="ml-0.5 sm:ml-1">
             <UserButton />
           </div>
         </div>
@@ -176,8 +196,44 @@ export default function WorkflowPage({ params }: { params: Promise<{ id: string 
 
       {/* ── Main: Left Sidebar | Canvas | Right Sidebar ── */}
       <ReactFlowProvider>
-        <main className="flex flex-1 w-full overflow-hidden">
-          <LeftSidebar />
+        <main className="flex flex-1 w-full overflow-hidden relative">
+
+          {/* Mobile Left Sidebar Overlay */}
+          {showLeftSidebar && (
+            <div className="sm:hidden absolute inset-0 z-40 flex">
+              <div className="relative bg-[#0a0a0f] h-full w-[180px] shrink-0 flex flex-col">
+                <button
+                  onClick={() => setShowLeftSidebar(false)}
+                  className="absolute top-2 right-2 w-6 h-6 rounded-md flex items-center justify-center text-gray-500 hover:text-white hover:bg-zinc-800 transition-colors z-10"
+                >
+                  <X size={14} />
+                </button>
+                <LeftSidebar />
+              </div>
+              <div className="flex-1 bg-black/40" onClick={() => setShowLeftSidebar(false)} />
+            </div>
+          )}
+
+          {/* Mobile Right Sidebar Overlay */}
+          {showRightSidebar && (
+            <div className="sm:hidden absolute inset-0 z-40 flex justify-end">
+              <div className="flex-1 bg-black/40" onClick={() => setShowRightSidebar(false)} />
+              <div className="relative bg-[#0f0f14] h-full w-[260px] shrink-0">
+                <button
+                  onClick={() => setShowRightSidebar(false)}
+                  className="absolute top-2 left-2 w-6 h-6 rounded-md flex items-center justify-center text-gray-500 hover:text-white hover:bg-zinc-800 transition-colors z-10"
+                >
+                  <X size={14} />
+                </button>
+                <RightSidebar />
+              </div>
+            </div>
+          )}
+
+          {/* Desktop Left Sidebar */}
+          <div className="hidden sm:block">
+            <LeftSidebar />
+          </div>
 
           <div className="flex-1 relative h-full">
             <WorkflowCanvas />
@@ -192,7 +248,10 @@ export default function WorkflowPage({ params }: { params: Promise<{ id: string 
             </div>
           </div>
 
-          <RightSidebar />
+          {/* Desktop Right Sidebar */}
+          <div className="hidden sm:block">
+            <RightSidebar />
+          </div>
         </main>
       </ReactFlowProvider>
     </div>

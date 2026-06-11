@@ -55,7 +55,8 @@ export const cropImageTask = task({
       // 4. Crop with sharp
       const outputBuffer = await sharp(inputBuffer)
         .extract({ left: cropX, top: cropY, width: cropW, height: cropH })
-        .jpeg({ quality: 85 })
+        .resize({ width: 800, height: 800, fit: "inside", withoutEnlargement: true })
+        .jpeg({ quality: 80 })
         .toBuffer();
 
       // 5. Convert to base64 data URI
